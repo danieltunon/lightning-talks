@@ -30,7 +30,7 @@ Liner.prototype._transform = function(chunk, encoding, done) {
   if (chunk.charAt(chunk.length - 1) !== '\n') {
     this._lineFragment = trailingLine;
   } else {
-    this.push(`${trailingLine}\n`);
+    this.push(`${trailingLine}`);
     this._trailingLine = '';
   }
   done();

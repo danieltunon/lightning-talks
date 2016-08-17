@@ -36,6 +36,10 @@ Liner.prototype._transform = function(chunk, encoding, done) {
   done();
 };
 
+Liner.prototype._flush = function(done) {
+  if (this._lineFragment) this.push(this._lineFragment);
+  this._lineFragment = null;
+};
 
 module.exports = {
   Center,

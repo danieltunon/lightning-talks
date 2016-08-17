@@ -12,7 +12,7 @@ Center.prototype._transform = function(line, encoding, done) {
   const padBefore = Array(Math.ceil((80 - line.length) / 2)).fill(' ').join('');
   const padAfter = Array(Math.floor((80 - line.length) / 2)).fill(' ').join('');
 
-  this.push(`${padBefore}${line}${padAfter}`);
+  this.push(`${padBefore}${line}${padAfter}\n`);
   done();
 };
 

@@ -4,42 +4,46 @@ class Center extends Transform {
   constructor() {
     super({ objectMode: true });
   }
+
+  _transform(line, encoding, done) {
+    line = line.toString();
+
+    const padBefore = Array(Math.ceil((80 - line.length) / 2)).fill(' ').join('');
+    const padAfter = Array(Math.floor((80 - line.length) / 2)).fill(' ').join('');
+
+    this.push(`${padBefore}${line}${padAfter}\n`);
+    done();
+  }
 }
 
-Center.prototype._transform = function(line, encoding, done) {
-  line = line.toString();
 
-  const padBefore = Array(Math.ceil((80 - line.length) / 2)).fill(' ').join('');
-  const padAfter = Array(Math.floor((80 - line.length) / 2)).fill(' ').join('');
+const Liner = new Transform({
+  objectMode: true,
 
-  this.push(`${padBefore}${line}${padAfter}\n`);
-  done();
-};
+  transform(chunk, encoding, done) {
+    let data = chunk.toString();
+    data = this._lineFragment ? this._lineFragment + data : data;
 
-const Liner = new Transform({ objectMode: true });
+    const lines = data.split('\n');
+    const trailingLine = lines.pop();
 
-Liner.prototype._transform = function(chunk, encoding, done) {
-  let data = chunk.toString();
-  data = this._lineFragment ? this._lineFragment + data : data;
+    lines.forEach(this.push.bind(this));
 
-  const lines = data.split('\n');
-  const trailingLine = lines.pop();
+    if (data.charAt(data.length - 1) !== '\n') {
+      this._lineFragment = trailingLine;
+    } else {
+      this.push(`${trailingLine}`);
+      this._trailingLine = '';
+    }
+    done();
+  },
 
-  lines.forEach(this.push.bind(this));
-
-  if (chunk.charAt(chunk.length - 1) !== '\n') {
-    this._lineFragment = trailingLine;
-  } else {
-    this.push(`${trailingLine}`);
-    this._trailingLine = '';
+  flush(done) {
+    if (this._lineFragment) this.push(this._lineFragment);
+    this._lineFragment = '';
+    done();
   }
-  done();
-};
-
-Liner.prototype._flush = function(done) {
-  if (this._lineFragment) this.push(this._lineFragment);
-  this._lineFragment = null;
-};
+});
 
 module.exports = {
   Center,

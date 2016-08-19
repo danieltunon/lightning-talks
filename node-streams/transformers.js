@@ -1,8 +1,9 @@
 const Transform = require('stream').Transform;
+const emojiMap = require('./emoji').keywordMap;
 
 class Center extends Transform {
   constructor() {
-    super({ objectMode: true });
+    super(/*{ objectMode: true }*/);
   }
 
   _transform(line, encoding, done) {
@@ -16,9 +17,29 @@ class Center extends Transform {
   }
 }
 
+class Emojify extends Transform {
+  randomVal(array) {
+    return array[Math.floor(Math.random() * array.length)];
+  }
+
+  emojiReplacer(word) {
+    if (emojiMap.has(word)) {
+      return String.fromCodePoint(`0x${this.randomVal(emojiMap.get(word))}`) + ' ';
+    }
+    return word;
+  }
+
+  _transform(line, encoding, done) {
+    line = line.toString();
+    this.push(line);
+    this.push(line.split(' ').map(this.emojiReplacer.bind(this)).join(' '));
+    done();
+  }
+}
 
 const Liner = new Transform({
-  objectMode: true,
+  // objectMode: true,
+  highWaterMark: 20,
 
   transform(chunk, encoding, done) {
     let data = chunk.toString();
@@ -48,4 +69,5 @@ const Liner = new Transform({
 module.exports = {
   Center,
   Liner,
+  Emojify,
 };

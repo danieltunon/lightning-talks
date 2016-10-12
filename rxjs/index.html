@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Map</title>
+<meta charset="utf-8">
+<style>
+
+/* CSS goes here. */
+.country.SCT { fill: #ddc; }
+.country.WLS { fill: #cdd; }
+.country.NIR { fill: #cdc; }
+.country.ENG { fill: #dcd; }
+.country.IRL { display: none; }
+.country.USA { fill: #500 }
+
+</style>
+<head>
+<body>
+  <h1>hi</h1>
+<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="//d3js.org/topojson.v1.min.js"></script>
+<script src="https://d3js.org/d3-array.v1.min.js"></script>
+<script src="https://d3js.org/d3-collection.v1.min.js"></script>
+<script src="https://d3js.org/d3-color.v1.min.js"></script>
+<script src="https://d3js.org/d3-format.v1.min.js"></script>
+<script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+<script src="https://d3js.org/d3-time.v1.min.js"></script>
+<script src="https://d3js.org/d3-time-format.v2.min.js"></script>
+<script src="https://d3js.org/d3-scale.v1.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script>
+/* JavaScript goes here. */
+var width = 960;
+var height = 1160;
+
+var countrIds = [
+  "ABW","AFG","AGO","AIA","ALB","ALD","AND","ARE","ARG","ARM","ASM","ATA","ATF",
+  "ATG","AUS","AUT","AZE","BDI","BEL","BEN","BFA","BGD","BGR","BHR","BHS","BIH",
+  "BLM","BLR","BLZ","BMU","BOL","BRA","BRB","BRN","BTN","BWA","CAF","CAN","CHE",
+  "CHL","CHN","CIV","CMR","CNM","COD","COG","COK","COL","COM","CPV","CRI","CUB",
+  "CUW","CYM","CYN","CYP","CZE","DEU","DJI","DMA","DNK","DOM","DZA","ECU","EGY",
+  "ERI","ESB","ESP","EST","ETH","FIN","FJI","FLK","FRA","FRO","FSM","GAB","GBR",
+  "GEO","GGY","GHA","GIB","GIN","GMB","GNB","GNQ","GRC","GRD","GRL","GTM","GUM",
+  "GUY","HKG","HMD","HND","HRV","HTI","HUN","IDN","IMN","IND","IOA","IOT","IRL",
+  "IRN","IRQ","ISL","ISR","ITA","JAM","JEY","JOR","JPN","KAB","KAS","KAZ","KEN",
+  "KGZ","KHM","KIR","KNA","KOR","KOS","KWT","LAO","LBN","LBR","LBY","LCA","LIE",
+  "LKA","LSO","LTU","LUX","LVA","MAC","MAF","MAR","MCO","MDA","MDG","MDV","MEX",
+  "MHL","MKD","MLI","MLT","MMR","MNE","MNG","MNP","MOZ","MRT","MSR","MUS","MWI",
+  "MYS","NAM","NCL","NER","NFK","NGA","NIC","NIU","NLD","NOR","NPL","NRU","NZL",
+  "OMN","PAK","PAN","PCN","PER","PGA","PHL","PLW","PN1","POL","PRI","PRK","PR1",
+  "PRY","PSX","PYF","QAT","ROU","RUS","RWA","SAH","SAU","SDN","SDS","SEN","SGP",
+  "SGS","SHN","SLB","SLE","SLV","SMR","SOL","SOM","SPM","SRB","STP","SUR","SVK",
+  "SVN","SWE","SWZ","SXM","SYC","SYR","TCA","TCD","TGO","THA","TJK","TKM","TLS",
+  "TON","TTO","TUN","TUR","TUV","TWN","TZA","UGA","UKR","URY","USA","USG","UZB",
+  "VAT","VCT","VEN","VGB","VIR","VNM","VUT","WLF","WSB","WSM","YEM","ZAF","ZMB",
+  "ZWE"
+]
+var countrColors = countrIds.reduce((colors, countr, i) => (colors[countr] = i + 1) && colors, {})
+
+var svg = d3.select("body").append("svg")
+.attr("width", width)
+.attr("height", height)
+
+d3.json("countr.json", function(error, countr) {
+  if (error) return console.error(error);
+  console.log(countr)
+  var countrs = topojson.feature(countr, countr.objects.countries);
+  var color = d3.scaleSequential( d3.interpolateYlGnBu).domain([1, countrIds.length])
+  console.log("color", color(36))
+  var proj = d3.geo.albers()
+      .center([0, 55.4])
+      .rotate([90.8, 0])
+      .parallels([40, 50])
+      .scale(500)
+      .translate([width / 2, height / 2]);
+  var path = d3.geo.path().projection(proj);
+  svg.append("path")
+      .datum(countrs)
+      .attr("d", path);
+  var countries = svg.selectAll(".country")
+  countries
+      .data(countrs.features)
+    .enter().append("path")
+      .attr("class", function(d) { return 'country ' + d.id })
+      .attr("d", path)
+      .style("fill", function(d) {
+        return color(countrColors[d.id]);
+      });
+});
+
+
+
+</script>
+</body>
+</html>
